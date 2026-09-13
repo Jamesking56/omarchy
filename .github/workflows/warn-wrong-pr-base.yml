@@ -1,0 +1,23 @@
+name: Warn on wrong PR base
+
+on:
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  warn:
+    if: github.event.pull_request.base.ref != 'quattro'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `This pull request targets \`${context.payload.pull_request.base.ref}\`. Please open it against \`quattro\` instead.`,
+            });
